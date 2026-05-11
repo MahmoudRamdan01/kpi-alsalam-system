@@ -73,3 +73,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Recharts: improve contrast on dark background */
+.dark .recharts-cartesian-grid line {
+  stroke: rgb(51 65 85 / 0.5);
+}
+
+.dark .recharts-text.recharts-label {
+  fill: rgb(226 232 240);
+}

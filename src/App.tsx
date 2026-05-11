@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Building2, Users, PhoneCall, Briefcase, BarChart3, Target, Award, FileText, ChevronRight, Bell, Search, Menu, X, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Clock, DollarSign, Percent, UserCheck, UserX, Filter, Download, ChevronDown, ChevronUp, Star, Medal, Zap, Lock, Shield
+  LayoutDashboard, Building2, Users, PhoneCall, Briefcase, BarChart3, Target, Award, FileText, ChevronRight, Bell, Search, Menu, X, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Clock, DollarSign, Percent, UserCheck, UserX, Filter, Download, ChevronDown, ChevronUp, Star, Medal, Zap, Lock, Shield, Moon, Sun
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,32 @@ const MENU_ITEMS = [
   { id: 'reports', label: 'Reports', labelAr: 'التقارير', icon: FileText },
 ];
 
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      className="shrink-0 border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      aria-label={mounted && resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
+    >
+      {!mounted ? (
+        <Moon className="h-4 w-4 opacity-50" />
+      ) : resolvedTheme === 'dark' ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
+    </Button>
+  );
+}
+
 export default function App() {
   const { alerts } = getDashboardData();
   const [activeView, setActiveView] = useState('executive');
@@ -73,7 +100,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] flex font-sans text-slate-800" dir="ltr">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-slate-950 flex font-sans text-slate-800 dark:text-slate-100 transition-colors duration-200" dir="ltr">
       {/* Sidebar Desktop */}
       <aside className={`hidden lg:flex flex-col bg-[#003366] text-white transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-20'} shadow-2xl`}>
         <div className="p-5 flex items-center justify-between">
@@ -134,9 +161,12 @@ export default function App() {
           <img src="/logo.png" alt="Andalusia Hospital" className="w-8 h-8 object-contain" />
           <span className="font-bold text-sm">Andalusia Hospital</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white">
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white">
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </Button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -171,23 +201,24 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30 lg:static">
+        <header className="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-30 lg:static transition-colors">
           <div className="flex items-center gap-4 flex-1">
-            <h2 className="text-lg font-bold text-[#003366]">
+            <h2 className="text-lg font-bold text-[#003366] dark:text-sky-300">
               {MENU_ITEMS.find(m => m.id === activeView)?.label}
             </h2>
-            <Badge variant="outline" className="hidden sm:inline-flex text-xs border-[#0066CC] text-[#0066CC]">
+            <Badge variant="outline" className="hidden sm:inline-flex text-xs border-[#0066CC] text-[#0066CC] dark:border-sky-400 dark:text-sky-300">
               {MENU_ITEMS.find(m => m.id === activeView)?.labelAr}
             </Badge>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center bg-slate-100 rounded-lg px-3 py-2">
+            <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-2 border border-transparent dark:border-slate-700">
               <Search className="w-4 h-4 text-slate-400 mr-2" />
-              <input type="text" placeholder="Search KPIs, employees..." className="bg-transparent text-sm outline-none w-48 text-slate-700" />
+              <input type="text" placeholder="Search KPIs, employees..." className="bg-transparent text-sm outline-none w-48 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500" />
             </div>
+            <ThemeToggle />
             <div className="relative">
-              <Button variant="ghost" size="icon" className="relative" onClick={() => setNotificationsOpen(!notificationsOpen)}>
-                <Bell className="w-5 h-5 text-slate-600" />
+              <Button variant="ghost" size="icon" className="relative text-slate-600 dark:text-slate-300" onClick={() => setNotificationsOpen(!notificationsOpen)}>
+                <Bell className="w-5 h-5" />
                 {unreadAlerts > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
                     {unreadAlerts}
@@ -200,22 +231,22 @@ export default function App() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden"
+                    className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
                   >
-                    <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                      <span className="font-semibold text-sm">Alerts</span>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                      <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Alerts</span>
                       <Badge variant="secondary" className="text-xs">{unreadAlerts} Unread</Badge>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {alerts.map((alert) => (
-                        <div key={alert.id} className="p-3 border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <div key={alert.id} className="p-3 border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors">
                           <div className="flex items-start gap-2">
                             {alert.type === 'danger' && <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />}
                             {alert.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />}
                             {alert.type === 'info' && <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />}
                             <div>
-                              <p className="text-xs font-medium text-slate-800">{alert.message}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{alert.department}</p>
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-100">{alert.message}</p>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{alert.department}</p>
                             </div>
                           </div>
                         </div>
@@ -281,10 +312,10 @@ function ExecutiveDashboard() {
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 shadow-md border-slate-200">
+        <Card className="lg:col-span-2 shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#0066CC]" />
+              <TrendingUp className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
               Hospital Performance Trends
             </CardTitle>
             <CardDescription>Monthly KPI trends by department</CardDescription>
@@ -306,10 +337,10 @@ function ExecutiveDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-[#0066CC]" />
+              <Building2 className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
               Department Performance
             </CardTitle>
           </CardHeader>
@@ -350,10 +381,10 @@ function ExecutiveDashboard() {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#0066CC]" />
+              <BarChart3 className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
               Department Score Comparison
             </CardTitle>
           </CardHeader>
@@ -371,7 +402,7 @@ function ExecutiveDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-500" />
@@ -404,10 +435,10 @@ function ExecutiveDashboard() {
       </div>
 
       {/* Top Performers Table */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Medal className="w-5 h-5 text-[#0066CC]" />
+            <Medal className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
             Top Performing Employees
           </CardTitle>
         </CardHeader>
@@ -431,7 +462,7 @@ function ExecutiveDashboard() {
                     <TableCell className="font-medium text-sm">{emp.name}</TableCell>
                     <TableCell className="text-sm text-slate-600">{emp.departmentAr}</TableCell>
                     <TableCell className="text-sm text-slate-600">{emp.role}</TableCell>
-                    <TableCell className="text-sm font-bold text-[#0066CC]">{emp.overallScore}%</TableCell>
+                    <TableCell className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{emp.overallScore}%</TableCell>
                     <TableCell className="text-sm text-slate-500">{emp.target}%</TableCell>
                     <TableCell>
                       <Badge className={`${STATUS_BG[emp.status]} text-xs`}>{emp.status}</Badge>
@@ -469,7 +500,7 @@ function DepartmentDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-[#003366]">Department Performance Analysis</h3>
+          <h3 className="text-lg font-bold text-[#003366] dark:text-sky-300">Department Performance Analysis</h3>
           <p className="text-sm text-slate-500">Compare and analyze department KPIs</p>
         </div>
         <Select value={selectedDept} onValueChange={setSelectedDept}>
@@ -491,7 +522,7 @@ function DepartmentDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Overall Score</p>
-                <p className="text-2xl font-bold text-[#0066CC]">{dept.overallScore}%</p>
+                <p className="text-2xl font-bold text-[#0066CC] dark:text-sky-400">{dept.overallScore}%</p>
                 <p className="text-xs text-slate-400">Target: {dept.target}%</p>
               </div>
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${dept.overallScore >= 85 ? 'bg-emerald-100' : 'bg-amber-100'}`}>
@@ -506,7 +537,7 @@ function DepartmentDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Employees</p>
-                <p className="text-2xl font-bold text-[#0066CC]">{dept.employeeCount}</p>
+                <p className="text-2xl font-bold text-[#0066CC] dark:text-sky-400">{dept.employeeCount}</p>
                 <p className="text-xs text-slate-400">Active staff</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -520,7 +551,7 @@ function DepartmentDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500">Manager</p>
-                <p className="text-lg font-bold text-[#0066CC]">{dept.manager}</p>
+                <p className="text-lg font-bold text-[#0066CC] dark:text-sky-400">{dept.manager}</p>
                 <p className="text-xs text-slate-400">Department Head</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
@@ -533,7 +564,7 @@ function DepartmentDashboard() {
 
       {/* Department Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{dept.nameAr} KPI Radar</CardTitle>
           </CardHeader>
@@ -552,7 +583,7 @@ function DepartmentDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Monthly Trend</CardTitle>
           </CardHeader>
@@ -571,7 +602,7 @@ function DepartmentDashboard() {
       </div>
 
       {/* KPI Breakdown */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">{dept.nameAr} KPI Breakdown</CardTitle>
         </CardHeader>
@@ -613,7 +644,7 @@ function DepartmentDashboard() {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{kpi.weight}%</TableCell>
-                    <TableCell className="text-sm font-bold text-[#0066CC]">{kpi.score.toFixed(1)}</TableCell>
+                    <TableCell className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{kpi.score.toFixed(1)}</TableCell>
                     <TableCell>
                       <Sparkline data={kpi.trend} width={60} height={24} />
                     </TableCell>
@@ -626,7 +657,7 @@ function DepartmentDashboard() {
       </Card>
 
       {/* Department Comparison Heatmap */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Department KPI Heatmap</CardTitle>
         </CardHeader>
@@ -707,7 +738,7 @@ function EmployeeDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Employee List */}
-        <Card className="lg:col-span-1 shadow-md border-slate-200 h-[500px]">
+        <Card className="lg:col-span-1 shadow-md border-slate-200 dark:border-slate-700 h-[500px]">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Employees ({filteredEmployees.length})</CardTitle>
           </CardHeader>
@@ -719,11 +750,11 @@ function EmployeeDashboard() {
                     key={e.id}
                     onClick={() => setSelectedEmp(e.id)}
                     className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left ${
-                      selectedEmp === e.id ? 'bg-[#0066CC] text-white shadow-md' : 'hover:bg-slate-50 text-slate-700'
+                      selectedEmp === e.id ? 'bg-[#0066CC] text-white shadow-md' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200'
                     }`}
                   >
                     <Avatar className={`w-10 h-10 ${selectedEmp === e.id ? 'border-2 border-white' : 'border-2 border-[#0066CC]'}`}>
-                      <AvatarFallback className={`text-xs font-bold ${selectedEmp === e.id ? 'bg-white text-[#0066CC]' : 'bg-[#0066CC] text-white'}`}>
+                      <AvatarFallback className={`text-xs font-bold ${selectedEmp === e.id ? 'bg-white text-[#0066CC] dark:text-sky-400' : 'bg-[#0066CC] text-white'}`}>
                         {e.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
@@ -746,7 +777,7 @@ function EmployeeDashboard() {
 
         {/* Employee Detail */}
         <div className="lg:col-span-2 space-y-4">
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Avatar className="w-16 h-16 border-4 border-[#0066CC]">
@@ -756,14 +787,14 @@ function EmployeeDashboard() {
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h3 className="text-xl font-bold text-[#003366]">{emp.name}</h3>
+                    <h3 className="text-xl font-bold text-[#003366] dark:text-sky-300">{emp.name}</h3>
                     <Badge className={`${STATUS_BG[emp.status]}`}>{emp.status}</Badge>
                     {emp.bonusEligible && <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">Bonus Eligible</Badge>}
                   </div>
                   <p className="text-sm text-slate-500 mt-1">{emp.role} | {emp.departmentAr} | Hired: {emp.hireDate}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-[#0066CC]">{emp.overallScore}%</p>
+                  <p className="text-3xl font-bold text-[#0066CC] dark:text-sky-400">{emp.overallScore}%</p>
                   <p className="text-xs text-slate-500">Rank #{employeeRank} of {employees.length}</p>
                 </div>
               </div>
@@ -771,11 +802,11 @@ function EmployeeDashboard() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500">Attendance</p>
-                  <p className="text-lg font-bold text-[#0066CC]">{emp.attendance}%</p>
+                  <p className="text-lg font-bold text-[#0066CC] dark:text-sky-400">{emp.attendance}%</p>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500">Base Salary</p>
-                  <p className="text-lg font-bold text-[#0066CC]">{emp.baseSalary.toLocaleString()} EGP</p>
+                  <p className="text-lg font-bold text-[#0066CC] dark:text-sky-400">{emp.baseSalary.toLocaleString()} EGP</p>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500">Bonus</p>
@@ -790,7 +821,7 @@ function EmployeeDashboard() {
           </Card>
 
           {/* Employee KPI Chart */}
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Performance Trend</CardTitle>
             </CardHeader>
@@ -808,7 +839,7 @@ function EmployeeDashboard() {
           </Card>
 
           {/* KPI Table */}
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Individual KPIs</CardTitle>
             </CardHeader>
@@ -840,7 +871,7 @@ function EmployeeDashboard() {
                           </span>
                         </TableCell>
                         <TableCell className="text-sm">{kpi.weight}%</TableCell>
-                        <TableCell className="text-sm font-bold text-[#0066CC]">{kpi.score.toFixed(1)}</TableCell>
+                        <TableCell className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{kpi.score.toFixed(1)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -873,10 +904,10 @@ function RecruitmentDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Funnel Chart */}
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Filter className="w-5 h-5 text-[#0066CC]" />
+              <Filter className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
               Recruitment Funnel
             </CardTitle>
           </CardHeader>
@@ -908,7 +939,7 @@ function RecruitmentDashboard() {
         </Card>
 
         {/* Recruiter Performance */}
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Recruiter Performance</CardTitle>
           </CardHeader>
@@ -929,7 +960,7 @@ function RecruitmentDashboard() {
       </div>
 
       {/* Recruiter Table */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Recruiter Details</CardTitle>
         </CardHeader>
@@ -960,7 +991,7 @@ function RecruitmentDashboard() {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{rec.timeToHire} days</TableCell>
-                    <TableCell className="text-sm font-bold text-[#0066CC]">{rec.qualityScore}%</TableCell>
+                    <TableCell className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{rec.qualityScore}%</TableCell>
                     <TableCell>
                       <Badge className={`${rec.hired >= rec.target ? STATUS_BG['Excellent'] : STATUS_BG['Good']}`}>
                         {rec.hired >= rec.target ? 'On Target' : 'In Progress'}
@@ -994,7 +1025,7 @@ function WorkforceDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Utilization by Department</CardTitle>
           </CardHeader>
@@ -1015,7 +1046,7 @@ function WorkforceDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Workload Analysis</CardTitle>
           </CardHeader>
@@ -1025,7 +1056,7 @@ function WorkforceDashboard() {
                 <div key={w.department} className="p-4 rounded-lg border border-slate-200">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-[#0066CC]" />
+                      <Briefcase className="w-4 h-4 text-[#0066CC] dark:text-sky-400" />
                       <span className="font-medium text-sm">{w.department}</span>
                     </div>
                     <Badge className={`${
@@ -1041,7 +1072,7 @@ function WorkforceDashboard() {
                     <span>Available: {w.availableHours}h</span>
                   </div>
                   <Progress value={w.utilization} className="h-3" />
-                  <p className="text-right text-xs font-bold mt-1 text-[#0066CC]">{w.utilization.toFixed(1)}%</p>
+                  <p className="text-right text-xs font-bold mt-1 text-[#0066CC] dark:text-sky-400">{w.utilization.toFixed(1)}%</p>
                 </div>
               ))}
             </div>
@@ -1050,7 +1081,7 @@ function WorkforceDashboard() {
       </div>
 
       {/* Workload Summary Table */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Workload Details</CardTitle>
         </CardHeader>
@@ -1116,7 +1147,7 @@ function KPIManagement() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-[#003366]">KPI Definitions & Structure</h3>
+          <h3 className="text-lg font-bold text-[#003366] dark:text-sky-300">KPI Definitions & Structure</h3>
           <p className="text-sm text-slate-500">Complete KPI library with formulas and weights</p>
         </div>
         <Select value={selectedType} onValueChange={setSelectedType}>
@@ -1135,7 +1166,7 @@ function KPIManagement() {
 
       <div className="grid grid-cols-1 gap-4">
         {filteredKPIs.map((kpi) => (
-          <Card key={kpi.id} className="shadow-md border-slate-200 overflow-hidden">
+          <Card key={kpi.id} className="shadow-md border-slate-200 dark:border-slate-700 overflow-hidden">
             <div
               className="p-5 cursor-pointer hover:bg-slate-50 transition-colors"
               onClick={() => setExpandedKPI(expandedKPI === kpi.id ? null : kpi.id)}
@@ -1151,7 +1182,7 @@ function KPIManagement() {
                     <Target className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-[#003366]">{kpi.name}</h4>
+                    <h4 className="font-bold text-sm text-[#003366] dark:text-sky-300">{kpi.name}</h4>
                     <p className="text-xs text-slate-500">{kpi.nameAr} | {kpi.department}</p>
                   </div>
                 </div>
@@ -1161,7 +1192,7 @@ function KPIManagement() {
                     {kpi.polarity}
                   </Badge>
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-bold text-[#0066CC]">{kpi.weight}% Weight</p>
+                    <p className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{kpi.weight}% Weight</p>
                   </div>
                   {expandedKPI === kpi.id ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                 </div>
@@ -1198,7 +1229,7 @@ function KPIManagement() {
                           </div>
                           <div className="flex justify-between text-sm">
                             <span className="text-slate-600">Current Actual:</span>
-                            <span className="font-bold text-[#0066CC]">{kpi.actual}{kpi.unit}</span>
+                            <span className="font-bold text-[#0066CC] dark:text-sky-400">{kpi.actual}{kpi.unit}</span>
                           </div>
                         </div>
                       </div>
@@ -1213,7 +1244,7 @@ function KPIManagement() {
                           </div>
                           <div className="flex justify-between text-sm">
                             <span className="text-slate-600">Score:</span>
-                            <span className="font-bold text-[#0066CC]">{kpi.score.toFixed(1)}</span>
+                            <span className="font-bold text-[#0066CC] dark:text-sky-400">{kpi.score.toFixed(1)}</span>
                           </div>
                           <Progress value={kpi.achievement} className="h-2 mt-2" />
                         </div>
@@ -1245,7 +1276,7 @@ function ScorecardSystem() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-[#003366]">Balanced Scorecard System</h3>
+          <h3 className="text-lg font-bold text-[#003366] dark:text-sky-300">Balanced Scorecard System</h3>
           <p className="text-sm text-slate-500">Calculate and review employee performance scores</p>
         </div>
         <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
@@ -1272,7 +1303,7 @@ function ScorecardSystem() {
         <Card className="shadow-md">
           <CardContent className="p-5 text-center">
             <p className="text-sm text-slate-500">Achievement</p>
-            <p className="text-3xl font-bold text-[#0066CC] mt-1">{((totalScore / totalWeight) * 100).toFixed(1)}%</p>
+            <p className="text-3xl font-bold text-[#0066CC] dark:text-sky-400 mt-1">{((totalScore / totalWeight) * 100).toFixed(1)}%</p>
           </CardContent>
         </Card>
         <Card className="shadow-md">
@@ -1290,7 +1321,7 @@ function ScorecardSystem() {
       </div>
 
       {/* Scorecard Table */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Detailed Scorecard: {emp.name}</CardTitle>
         </CardHeader>
@@ -1319,17 +1350,17 @@ function ScorecardSystem() {
                     <TableCell className="text-sm font-medium">{kpi.actual}{kpi.unit}</TableCell>
                     <TableCell className="text-sm font-bold">{kpi.achievement.toFixed(1)}%</TableCell>
                     <TableCell className="text-sm">{kpi.weight}%</TableCell>
-                    <TableCell className="text-sm font-bold text-[#0066CC]">{kpi.score.toFixed(1)}</TableCell>
+                    <TableCell className="text-sm font-bold text-[#0066CC] dark:text-sky-400">{kpi.score.toFixed(1)}</TableCell>
                     <TableCell className="text-xs text-slate-500 font-mono">Actual/Target × Weight</TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-[#F0F4F8] font-bold">
+                <TableRow className="bg-[#F0F4F8] dark:bg-slate-800 font-bold">
                   <TableCell className="text-sm">TOTAL</TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>
                   <TableCell></TableCell>
                   <TableCell className="text-sm">{totalWeight}%</TableCell>
-                  <TableCell className="text-sm text-[#0066CC]">{totalScore.toFixed(1)}</TableCell>
+                  <TableCell className="text-sm text-[#0066CC] dark:text-sky-400">{totalScore.toFixed(1)}</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               </TableBody>
@@ -1340,7 +1371,7 @@ function ScorecardSystem() {
 
       {/* Score Visualization */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Score Breakdown</CardTitle>
           </CardHeader>
@@ -1369,7 +1400,7 @@ function ScorecardSystem() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md border-slate-200">
+        <Card className="shadow-md border-slate-200 dark:border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Score vs Target by KPI</CardTitle>
           </CardHeader>
@@ -1404,12 +1435,12 @@ function RewardsPenalties() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-[#003366]">Rewards & Penalties System</h3>
+        <h3 className="text-lg font-bold text-[#003366] dark:text-sky-300">Rewards & Penalties System</h3>
         <p className="text-sm text-slate-500">Performance-based incentive structure</p>
       </div>
 
       {/* Rewards Table */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Award className="w-5 h-5 text-emerald-500" />
@@ -1471,10 +1502,10 @@ function RewardsPenalties() {
       </Card>
 
       {/* Bonus Calculator */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-[#0066CC]" />
+            <DollarSign className="w-5 h-5 text-[#0066CC] dark:text-sky-400" />
             Bonus Calculator
           </CardTitle>
           <CardDescription>Formula: Bonus = Base Salary × Performance Score × Bonus %</CardDescription>
@@ -1503,13 +1534,13 @@ function RewardsPenalties() {
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-2 block">Bonus Percentage</label>
-              <div className="text-2xl font-bold text-[#0066CC] pt-2">{bonusPercent}%</div>
+              <div className="text-2xl font-bold text-[#0066CC] dark:text-sky-400 pt-2">{bonusPercent}%</div>
             </div>
           </div>
 
-          <div className="bg-[#F0F4F8] rounded-xl p-6 text-center">
+          <div className="bg-[#F0F4F8] dark:bg-slate-800 rounded-xl p-6 text-center">
             <p className="text-sm text-slate-500 mb-2">Calculated Bonus</p>
-            <p className="text-4xl font-bold text-[#0066CC]">{bonusAmount.toLocaleString()} EGP</p>
+            <p className="text-4xl font-bold text-[#0066CC] dark:text-sky-400">{bonusAmount.toLocaleString()} EGP</p>
             <p className="text-xs text-slate-500 mt-2">
               {calcSalary.toLocaleString()} × {calcScore}% × {bonusPercent}% = {bonusAmount.toLocaleString()}
             </p>
@@ -1518,7 +1549,7 @@ function RewardsPenalties() {
       </Card>
 
       {/* Penalties */}
-      <Card className="shadow-md border-slate-200">
+      <Card className="shadow-md border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Lock className="w-5 h-5 text-red-500" />
@@ -1562,7 +1593,7 @@ function ReportsSystem() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-[#003366]">Performance Reports</h3>
+          <h3 className="text-lg font-bold text-[#003366] dark:text-sky-300">Performance Reports</h3>
           <p className="text-sm text-slate-500">Daily, Weekly, and Monthly performance reports</p>
         </div>
         <Button variant="outline" className="gap-2">
@@ -1579,7 +1610,7 @@ function ReportsSystem() {
         </TabsList>
 
         <TabsContent value="daily" className="mt-6">
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardHeader>
               <CardTitle className="text-base">Daily Monitoring Report - May 3, 2026</CardTitle>
               <CardDescription>Real-time performance snapshot</CardDescription>
@@ -1588,11 +1619,11 @@ function ReportsSystem() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <div className="bg-slate-50 p-4 rounded-lg text-center">
                   <p className="text-xs text-slate-500">Today's Score</p>
-                  <p className="text-2xl font-bold text-[#0066CC]">83.5%</p>
+                  <p className="text-2xl font-bold text-[#0066CC] dark:text-sky-400">83.5%</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-lg text-center">
                   <p className="text-xs text-slate-500">Patients Served</p>
-                  <p className="text-2xl font-bold text-[#0066CC]">342</p>
+                  <p className="text-2xl font-bold text-[#0066CC] dark:text-sky-400">342</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-lg text-center">
                   <p className="text-xs text-slate-500">Avg Wait Time</p>
@@ -1609,7 +1640,7 @@ function ReportsSystem() {
         </TabsContent>
 
         <TabsContent value="weekly" className="mt-6">
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardHeader>
               <CardTitle className="text-base">Weekly Trends Report - Week 18, 2026</CardTitle>
               <CardDescription>Trend analysis for the past 7 days</CardDescription>
@@ -1639,7 +1670,7 @@ function ReportsSystem() {
         </TabsContent>
 
         <TabsContent value="monthly" className="mt-6 space-y-6">
-          <Card className="shadow-md border-slate-200">
+          <Card className="shadow-md border-slate-200 dark:border-slate-700">
             <CardHeader>
               <CardTitle className="text-base">Monthly Performance Report - {report.period}</CardTitle>
               <CardDescription>Comprehensive monthly analysis for decision making</CardDescription>
@@ -1678,7 +1709,7 @@ function ReportsSystem() {
               <div className="space-y-2">
                 {report.trends.map((trend, i) => (
                   <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
-                    <Activity className="w-4 h-4 text-[#0066CC]" />
+                    <Activity className="w-4 h-4 text-[#0066CC] dark:text-sky-400" />
                     <span className="text-sm text-slate-700">{trend}</span>
                   </div>
                 ))}
@@ -1687,7 +1718,7 @@ function ReportsSystem() {
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-md border-slate-200">
+            <Card className="shadow-md border-slate-200 dark:border-slate-700">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-emerald-700">Top Performers</CardTitle>
               </CardHeader>
@@ -1704,7 +1735,7 @@ function ReportsSystem() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-md border-slate-200">
+            <Card className="shadow-md border-slate-200 dark:border-slate-700">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base text-red-700">Needs Improvement</CardTitle>
               </CardHeader>
@@ -1734,13 +1765,13 @@ function StatCard({ title, value, subtitle, icon: Icon, color, trend }: {
   title: string; value: string; subtitle: string; icon: React.ElementType; color: string; trend: number;
 }) {
   return (
-    <Card className="shadow-md border-slate-200 overflow-hidden">
+    <Card className="shadow-md border-slate-200 dark:border-slate-700 overflow-hidden">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">{title}</p>
-            <p className="text-2xl font-bold text-[#003366] mt-1">{value}</p>
-            <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">{title}</p>
+            <p className="text-2xl font-bold text-[#003366] dark:text-sky-300 mt-1">{value}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{subtitle}</p>
           </div>
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color} bg-opacity-10`}>
             <Icon className={`w-5 h-5 ${color.replace('bg-', 'text-')}`} />
