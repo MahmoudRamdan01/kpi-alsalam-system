@@ -7,7 +7,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="andalusia-kpi-theme">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="alsalam-kpi-theme">
       <BrowserRouter>
         <App />
       </BrowserRouter>

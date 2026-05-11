@@ -17,14 +17,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDashboardData, subscribeDashboardData, useGoogleSheetsLiveSync } from '@/data/liveDashboardData';
+import { BRAND } from '@/config/brand';
 
 const COLORS = ['#0066CC', '#00A3CC', '#66C2FF', '#99D6FF', '#CCEBFF', '#E6F5FF'];
 const STATUS_BG = {
-  'Excellent': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Good': 'bg-blue-50 text-blue-700 border-blue-200',
-  'Average': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Needs Improvement': 'bg-orange-50 text-orange-700 border-orange-200',
-  'Critical': 'bg-red-50 text-red-700 border-red-200'
+  'Excellent': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
+  'Good': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+  'Average': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+  'Needs Improvement': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800',
+  'Critical': 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800'
 };
 
 const MENU_ITEMS = [
@@ -73,6 +74,10 @@ export default function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [, setDataVersion] = useState(0);
 
+  useEffect(() => {
+    document.title = BRAND.documentTitle;
+  }, []);
+
   useGoogleSheetsLiveSync();
 
   useEffect(() => {
@@ -106,10 +111,11 @@ export default function App() {
         <div className="p-5 flex items-center justify-between">
           {sidebarOpen && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3">
-              <img src="/logo.png" alt="Andalusia Hospital" className="w-10 h-10 object-contain" />
+              <img src="/logo.png" alt={BRAND.hospitalEn} className="w-10 h-10 object-contain" />
               <div>
-                <h1 className="font-bold text-sm leading-tight">Andalusia</h1>
-                <p className="text-[10px] text-blue-200">Hospital KPI System</p>
+                <h1 className="font-bold text-sm leading-tight">{BRAND.shortEn}</h1>
+                <p className="text-[10px] text-blue-200">{BRAND.productEn}</p>
+                <p className="text-[10px] text-blue-300/90 leading-tight mt-0.5" dir="rtl">{BRAND.hospitalAr}</p>
               </div>
             </motion.div>
           )}
@@ -158,8 +164,8 @@ export default function App() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#003366] text-white flex items-center justify-between p-4 shadow-lg">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Andalusia Hospital" className="w-8 h-8 object-contain" />
-          <span className="font-bold text-sm">Andalusia Hospital</span>
+          <img src="/logo.png" alt={BRAND.hospitalEn} className="w-8 h-8 object-contain" />
+          <span className="font-bold text-sm">{BRAND.hospitalEn}</span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />

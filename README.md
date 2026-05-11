@@ -1,4 +1,8 @@
-# React + TypeScript + Vite
+# Alsalam Hospital KPI Dashboard
+
+React + TypeScript + Vite app for **Alsalam Hospital** performance KPIs (live Google Sheets / Excel pipeline).
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
