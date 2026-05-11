@@ -4,10 +4,6 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 ## Live Excel Sync to Dashboard
 
-- ضع بياناتك في `data/kpi-data.xlsx`
-- لتشغيل التطوير مع التحديث التلقائي عند أي تعديل في Excel:
-  - `npm run dev:live-data`
-
 What happens automatically:
 - Any change in `data/kpi-data.xlsx` triggers `scripts/excel-to-ts.mjs`
 - Generated file `src/data/hospitalData.ts` is updated
