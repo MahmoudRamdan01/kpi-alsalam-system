@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Building2, Users, PhoneCall, Briefcase, BarChart3, Target, Award, FileText, ChevronRight, Bell, Search, Menu, X, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Clock, DollarSign, Percent, UserCheck, UserX, Filter, Download, ChevronDown, ChevronUp, Star, Medal, Zap, Lock, Shield, Moon, Sun
+  LayoutDashboard, Building2, Users, PhoneCall, Briefcase, BarChart3, Target, Award, FileText, ChevronRight, Bell, Search, Menu, X, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Clock, DollarSign, Percent, UserCheck, UserX, Filter, Download, ChevronDown, ChevronUp, Star, Medal, Zap, Lock, Shield, Moon, Sun, RefreshCw
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getDashboardData, subscribeDashboardData, useGoogleSheetsLiveSync } from '@/data/liveDashboardData';
+import { getDashboardData, subscribeDashboardData, useGoogleSheetsLiveSync, requestDashboardRefresh } from '@/data/liveDashboardData';
 import { BRAND } from '@/config/brand';
 
 const COLORS = ['#0066CC', '#00A3CC', '#66C2FF', '#99D6FF', '#CCEBFF', '#E6F5FF'];
@@ -66,15 +66,35 @@ function ThemeToggle() {
   );
 }
 
+function DataRefreshButton({ mobile }: { mobile?: boolean }) {
+  const hasSheet = Boolean(import.meta.env.VITE_GOOGLE_SHEET_ID);
+  return (
+    <Button
+      type="button"
+      variant={mobile ? "ghost" : "outline"}
+      size="icon"
+      className={
+        mobile
+          ? "shrink-0 text-white hover:bg-blue-800/80"
+          : "shrink-0 border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+      }
+      disabled={!hasSheet}
+      title={hasSheet ? "Refresh data from Google Sheet" : "Set VITE_GOOGLE_SHEET_ID to enable live sheet sync"}
+      onClick={() => requestDashboardRefresh()}
+      aria-label="Refresh data from spreadsheet"
+    >
+      <RefreshCw className={mobile ? "h-5 w-5" : "h-4 w-4"} />
+    </Button>
+  );
+}
+
 export default function App() {
-  const { alerts } = getDashboardData();
+  const [dataVersion, setDataVersion] = useState(0);
   const [activeView, setActiveView] = useState('executive');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [, setDataVersion] = useState(0);
-
-  useEffect(() => {
+  const { alerts } = getDashboardData();
     document.title = BRAND.documentTitle;
   }, []);
 
@@ -168,6 +188,7 @@ export default function App() {
           <span className="font-bold text-sm">{BRAND.hospitalEn}</span>
         </div>
         <div className="flex items-center gap-2">
+          <DataRefreshButton mobile />
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white">
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -221,6 +242,7 @@ export default function App() {
               <Search className="w-4 h-4 text-slate-400 mr-2" />
               <input type="text" placeholder="Search KPIs, employees..." className="bg-transparent text-sm outline-none w-48 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500" />
             </div>
+            <DataRefreshButton />
             <ThemeToggle />
             <div className="relative">
               <Button variant="ghost" size="icon" className="relative text-slate-600 dark:text-slate-300" onClick={() => setNotificationsOpen(!notificationsOpen)}>
@@ -278,7 +300,7 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {renderView()}
+              <div key={dataVersion}>{renderView()}</div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -297,23 +319,43 @@ function ExecutiveDashboard() {
   const topDept = [...departments].sort((a, b) => b.overallScore - a.overallScore)[0];
   const lowDept = [...departments].sort((a, b) => a.overallScore - b.overallScore)[0];
 
+  const lastM = months.length - 1;
+  const prevM = lastM - 1;
+  const hospitalAvgNow =
+    departments.length > 0
+      ? departments.reduce((sum, d) => sum + (d.monthlyTrend[lastM] ?? 0), 0) / departments.length
+      : 0;
+  const hospitalAvgPrev =
+    prevM >= 0 && departments.length > 0
+      ? departments.reduce((sum, d) => sum + (d.monthlyTrend[prevM] ?? 0), 0) / departments.length
+      : hospitalAvgNow;
+  const hospitalMomTrend = Math.round((hospitalAvgNow - hospitalAvgPrev) * 10) / 10;
+
+  const topDeptMom =
+    lastM > 0 ? (topDept.monthlyTrend[lastM] ?? 0) - (topDept.monthlyTrend[prevM] ?? 0) : 0;
+  const lowDeptMom =
+    lastM > 0 ? (lowDept.monthlyTrend[lastM] ?? 0) - (lowDept.monthlyTrend[prevM] ?? 0) : 0;
+
   const trendData = months.map((m, i) => ({
     month: m,
-    overall: [78, 79, 80, 80.5, 81, 81.5, 82, 82.5, 82, 82.5, 83, 83.2][i],
-    doctors: departments[0].monthlyTrend[i],
-    nurses: departments[1].monthlyTrend[i],
-    reception: departments[2].monthlyTrend[i],
-    hr: departments[3].monthlyTrend[i],
+    overall:
+      departments.length > 0
+        ? departments.reduce((sum, d) => sum + (d.monthlyTrend[i] ?? 0), 0) / departments.length
+        : 0,
+    doctors: departments[0]?.monthlyTrend[i] ?? 0,
+    nurses: departments[1]?.monthlyTrend[i] ?? 0,
+    reception: departments[2]?.monthlyTrend[i] ?? 0,
+    hr: departments[3]?.monthlyTrend[i] ?? 0,
   }));
 
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Overall Hospital Score" value={`${avgScore.toFixed(1)}%`} subtitle="Target: 85%" icon={Activity} color="bg-blue-500" trend={+2.3} />
-        <StatCard title="Total Employees" value={totalEmployees.toString()} subtitle="Across 5 Departments" icon={Users} color="bg-teal-500" trend={+5} />
-        <StatCard title="Top Department" value={topDept.nameAr} subtitle={`${topDept.overallScore}% Score`} icon={Star} color="bg-emerald-500" trend={+1.2} />
-        <StatCard title="Needs Attention" value={lowDept.nameAr} subtitle={`${lowDept.overallScore}% Score`} icon={AlertTriangle} color="bg-amber-500" trend={-1.5} />
+        <StatCard title="Overall Hospital Score" value={`${avgScore.toFixed(1)}%`} subtitle="Target: 85%" icon={Activity} color="bg-blue-500" trend={hospitalMomTrend} />
+        <StatCard title="Total Employees" value={totalEmployees.toString()} subtitle="Across 5 Departments" icon={Users} color="bg-teal-500" trend={0} />
+        <StatCard title="Top Department" value={topDept.nameAr} subtitle={`${topDept.overallScore}% Score`} icon={Star} color="bg-emerald-500" trend={Math.round(topDeptMom * 10) / 10} />
+        <StatCard title="Needs Attention" value={lowDept.nameAr} subtitle={`${lowDept.overallScore}% Score`} icon={AlertTriangle} color="bg-amber-500" trend={Math.round(lowDeptMom * 10) / 10} />
       </div>
 
       {/* Charts Row 1 */}
@@ -334,6 +376,7 @@ function ExecutiveDashboard() {
                 <YAxis domain={[60, 95]} tick={{ fontSize: 12 }} />
                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
                 <Legend />
+                <Area type="monotone" dataKey="overall" stroke="#64748b" fill="#64748b" fillOpacity={0.08} strokeWidth={2} name="Hospital avg" />
                 <Area type="monotone" dataKey="doctors" stroke="#0066CC" fill="#0066CC" fillOpacity={0.1} strokeWidth={2} name="Doctors" />
                 <Area type="monotone" dataKey="nurses" stroke="#00A3CC" fill="#00A3CC" fillOpacity={0.1} strokeWidth={2} name="Nurses" />
                 <Area type="monotone" dataKey="reception" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.1} strokeWidth={2} name="Reception" />

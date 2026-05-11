@@ -98,9 +98,24 @@ function setDashboardData(data: DashboardData) {
   notify();
 }
 
+/** Manual refresh from UI (same as poll). */
+let runSync: (() => void) | null = null;
+
+export function requestDashboardRefresh() {
+  runSync?.();
+}
+
 async function fetchSheetRows(sheetId: string, sheetName: string): Promise<Record<string, unknown>[]> {
-  const url = `https://opensheet.elk.sh/${sheetId}/${encodeURIComponent(sheetName)}`;
-  const response = await fetch(url, { cache: "no-store" });
+  // Bust CDN/proxy caches (opensheet + browsers often cache JSON aggressively).
+  const bust = `cb=${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const url = `https://opensheet.elk.sh/${sheetId}/${encodeURIComponent(sheetName)}?${bust}`;
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
+  });
   if (!response.ok) {
     throw new Error(`Failed to fetch ${sheetName}`);
   }
@@ -238,28 +253,51 @@ async function fetchGoogleSheetsData(sheetId: string): Promise<DashboardData> {
   };
 }
 
+function parsePollMs(): number {
+  const raw = import.meta.env.VITE_SHEET_POLL_MS as string | undefined;
+  const n = raw ? Number.parseInt(raw, 10) : Number.NaN;
+  if (Number.isFinite(n) && n >= 5000 && n <= 300_000) return n;
+  return 15_000;
+}
+
 export function useGoogleSheetsLiveSync() {
   useEffect(() => {
     const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID as string | undefined;
     if (!sheetId) return;
 
     let cancelled = false;
+    const pollMs = parsePollMs();
 
     const sync = async () => {
       try {
         const nextData = await fetchGoogleSheetsData(sheetId);
         if (!cancelled) setDashboardData(nextData);
-      } catch {
-        // Keep fallback data on any fetch/parsing error.
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.warn("[liveDashboardData] Sheet sync failed, keeping last data:", e);
+        }
       }
     };
 
-    sync();
-    const interval = setInterval(sync, 60000);
+    runSync = () => {
+      void sync();
+    };
+
+    void sync();
+    const interval = setInterval(sync, pollMs);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void sync();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
 
     return () => {
       cancelled = true;
+      runSync = null;
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, []);
 }

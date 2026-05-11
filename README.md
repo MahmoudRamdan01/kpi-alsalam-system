@@ -23,7 +23,14 @@ What happens automatically:
 4. Either add in Vercel **Settings → Environment Variables** `VITE_GOOGLE_SHEET_ID=<SHEET_ID>`, **or** rely on the committed `.env.production` in this repo (already set for the live sheet).
 5. Redeploy once (or push to `main` if Git auto-deploy is on).
 
-After that, dashboard fetches live data every 60 seconds directly from Google Sheets.
+After that, dashboard fetches live data on an interval (default **15s**) directly from Google Sheets.
+
+- **Cache:** requests use cache-busting and `no-store` so new numbers show up sooner.
+- **Manual refresh:** use the refresh (↻) button in the header next to dark mode.
+- **Polling:** optional env `VITE_SHEET_POLL_MS` (milliseconds, min `5000`, max `300000`) overrides the default `15000`.
+- **Tab focus:** when you return to the browser tab, data sync runs again.
+
+If numbers still look stale, confirm the spreadsheet is **shared (Anyone with the link can view)** and that sheet tab names match exactly: `months`, `kpis`, `departments`, `employees`, etc.
 
 Currently, two official plugins are available:
 
