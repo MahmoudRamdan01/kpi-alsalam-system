@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "data:excel": "node scripts/excel-to-ts.mjs",
+    "data:watch": "node scripts/watch-excel.mjs",
+    "dev:live-data": "node scripts/dev-live-data.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -56,6 +59,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.5"
   },
   "devDependencies": {

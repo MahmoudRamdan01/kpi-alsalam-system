@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard, Building2, Users, PhoneCall, Briefcase, BarChart3, Target, Award, FileText, ChevronRight, Bell, Search, Menu, X, Activity, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Clock, DollarSign, Percent, UserCheck, UserX, Filter, Download, ChevronDown, ChevronUp, Star, Medal, Zap, Lock, Shield
 } from 'lucide-react';
@@ -15,9 +15,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  departments, employees, hospitalKPIs, recruitmentFunnel, recruiters, alerts, reportPeriods, workloadData, months
-} from '@/data/hospitalData';
+import { getDashboardData, subscribeDashboardData, useGoogleSheetsLiveSync } from '@/data/liveDashboardData';
 
 const COLORS = ['#0066CC', '#00A3CC', '#66C2FF', '#99D6FF', '#CCEBFF', '#E6F5FF'];
 const STATUS_BG = {
@@ -41,10 +39,21 @@ const MENU_ITEMS = [
 ];
 
 export default function App() {
+  const { alerts } = getDashboardData();
   const [activeView, setActiveView] = useState('executive');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [, setDataVersion] = useState(0);
+
+  useGoogleSheetsLiveSync();
+
+  useEffect(() => {
+    const unsubscribe = subscribeDashboardData(() => {
+      setDataVersion((v) => v + 1);
+    });
+    return unsubscribe;
+  }, []);
 
   const unreadAlerts = alerts.filter(a => a.type !== 'info').length;
 
@@ -245,6 +254,7 @@ export default function App() {
    EXECUTIVE DASHBOARD
    ──────────────────────────────────────────── */
 function ExecutiveDashboard() {
+  const { departments, employees, alerts, months } = getDashboardData();
   const avgScore = departments.reduce((sum, d) => sum + d.overallScore, 0) / departments.length;
   const totalEmployees = departments.reduce((sum, d) => sum + d.employeeCount, 0);
   const topDept = [...departments].sort((a, b) => b.overallScore - a.overallScore)[0];
@@ -444,6 +454,7 @@ function ExecutiveDashboard() {
    DEPARTMENT DASHBOARD
    ──────────────────────────────────────────── */
 function DepartmentDashboard() {
+  const { departments } = getDashboardData();
   const [selectedDept, setSelectedDept] = useState<string>(departments[0].id);
   const dept = departments.find(d => d.id === selectedDept) || departments[0];
 
@@ -652,6 +663,7 @@ function DepartmentDashboard() {
    EMPLOYEE DASHBOARD
    ──────────────────────────────────────────── */
 function EmployeeDashboard() {
+  const { employees, departments, months } = getDashboardData();
   const [selectedEmp, setSelectedEmp] = useState<string>(employees[0].id);
   const [searchTerm, setSearchTerm] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
@@ -846,6 +858,7 @@ function EmployeeDashboard() {
    RECRUITMENT DASHBOARD
    ──────────────────────────────────────────── */
 function RecruitmentDashboard() {
+  const { recruiters, recruitmentFunnel } = getDashboardData();
   const avgTimeToHire = recruiters.reduce((sum, r) => sum + r.timeToHire, 0) / recruiters.length;
   const totalHired = recruiters.reduce((sum, r) => sum + r.hired, 0);
   const totalTarget = recruiters.reduce((sum, r) => sum + r.target, 0);
@@ -968,6 +981,7 @@ function RecruitmentDashboard() {
    WORKFORCE DASHBOARD
    ──────────────────────────────────────────── */
 function WorkforceDashboard() {
+  const { workloadData } = getDashboardData();
   const overloaded = workloadData.filter(w => w.utilization > 90);
   const underutilized = workloadData.filter(w => w.utilization < 60);
 
@@ -1092,6 +1106,7 @@ function WorkforceDashboard() {
    KPI MANAGEMENT
    ──────────────────────────────────────────── */
 function KPIManagement() {
+  const { hospitalKPIs } = getDashboardData();
   const [selectedType, setSelectedType] = useState('All');
   const [expandedKPI, setExpandedKPI] = useState<string | null>(null);
 
@@ -1219,6 +1234,7 @@ function KPIManagement() {
    SCORECARD SYSTEM
    ──────────────────────────────────────────── */
 function ScorecardSystem() {
+  const { employees } = getDashboardData();
   const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0].id);
   const emp = employees.find(e => e.id === selectedEmployee) || employees[0];
 
@@ -1537,6 +1553,7 @@ function RewardsPenalties() {
    REPORTS SYSTEM
    ──────────────────────────────────────────── */
 function ReportsSystem() {
+  const { reportPeriods } = getDashboardData();
   const [activeTab, setActiveTab] = useState('monthly');
 
   const report = reportPeriods[2]; // March 2026

@@ -2,6 +2,29 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Live Excel Sync to Dashboard
+
+- ضع بياناتك في `data/kpi-data.xlsx`
+- لتشغيل التطوير مع التحديث التلقائي عند أي تعديل في Excel:
+  - `npm run dev:live-data`
+
+What happens automatically:
+- Any change in `data/kpi-data.xlsx` triggers `scripts/excel-to-ts.mjs`
+- Generated file `src/data/hospitalData.ts` is updated
+- Vite HMR refreshes dashboard data مباشرة
+
+## Live Google Sheets on Vercel (No Redeploy)
+
+1. Upload your Excel to Google Sheets.
+2. Make the sheet public for viewing.
+3. Copy the Sheet ID from URL:
+   - `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`
+4. In Vercel project settings, add environment variable:
+   - `VITE_GOOGLE_SHEET_ID=<SHEET_ID>`
+5. Redeploy once.
+
+After that, dashboard fetches live data every 60 seconds directly from Google Sheets.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
