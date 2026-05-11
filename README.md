@@ -7,9 +7,6 @@ React + TypeScript + Vite app for **Alsalam Hospital** performance KPIs (live Go
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 ## Live Excel Sync to Dashboard
-
-- ضع بياناتك في `data/kpi-data.xlsx`
-- لتشغيل التطوير مع التحديث التلقائي عند أي تعديل في Excel:
   - `npm run dev:live-data`
 
 What happens automatically:
