@@ -4,6 +4,10 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 ## Live Excel Sync to Dashboard
 
+- ضع بياناتك في `data/kpi-data.xlsx`
+- لتشغيل التطوير مع التحديث التلقائي عند أي تعديل في Excel:
+  - `npm run dev:live-data`
+
 What happens automatically:
 - Any change in `data/kpi-data.xlsx` triggers `scripts/excel-to-ts.mjs`
 - Generated file `src/data/hospitalData.ts` is updated
@@ -15,9 +19,8 @@ What happens automatically:
 2. Make the sheet public for viewing.
 3. Copy the Sheet ID from URL:
    - `https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit`
-4. In Vercel project settings, add environment variable:
-   - `VITE_GOOGLE_SHEET_ID=<SHEET_ID>`
-5. Redeploy once.
+4. Either add in Vercel **Settings → Environment Variables** `VITE_GOOGLE_SHEET_ID=<SHEET_ID>`, **or** rely on the committed `.env.production` in this repo (already set for the live sheet).
+5. Redeploy once (or push to `main` if Git auto-deploy is on).
 
 After that, dashboard fetches live data every 60 seconds directly from Google Sheets.
 
