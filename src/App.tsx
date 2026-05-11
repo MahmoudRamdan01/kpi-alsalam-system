@@ -454,7 +454,7 @@ function ExecutiveDashboard() {
    DEPARTMENT DASHBOARD
    ──────────────────────────────────────────── */
 function DepartmentDashboard() {
-  const { departments } = getDashboardData();
+  const { departments, months } = getDashboardData();
   const [selectedDept, setSelectedDept] = useState<string>(departments[0].id);
   const dept = departments.find(d => d.id === selectedDept) || departments[0];
 

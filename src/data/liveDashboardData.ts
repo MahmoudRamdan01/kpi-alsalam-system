@@ -12,6 +12,24 @@ import {
 } from "@/data/hospitalData";
 import type { AlertItem, Department, Employee, KPI, Recruiter, RecruitmentStage, ReportPeriod } from "@/types";
 
+const KPI_TYPES: KPI["type"][] = ["Quality", "Efficiency", "Productivity", "Financial", "Strategic"];
+const PERF_STATUSES: Department["status"][] = ["Excellent", "Good", "Average", "Needs Improvement", "Critical"];
+
+function coerceKpiType(value: unknown): KPI["type"] {
+  const s = String(value ?? "Quality");
+  return KPI_TYPES.includes(s as KPI["type"]) ? (s as KPI["type"]) : "Quality";
+}
+
+function coercePolarity(value: unknown): KPI["polarity"] {
+  const s = String(value ?? "Higher is Better");
+  return s === "Lower is Better" ? "Lower is Better" : "Higher is Better";
+}
+
+function coercePerfStatus(value: unknown): Department["status"] {
+  const s = String(value ?? "Average");
+  return PERF_STATUSES.includes(s as Department["status"]) ? (s as Department["status"]) : "Average";
+}
+
 type WorkloadItem = {
   department: string;
   workedHours: number;
@@ -70,7 +88,9 @@ export function getDashboardData() {
 
 export function subscribeDashboardData(listener: () => void) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 function setDashboardData(data: DashboardData) {
@@ -116,8 +136,8 @@ async function fetchGoogleSheetsData(sheetId: string): Promise<DashboardData> {
     id: String(row.id || `kpi-${String(index + 1).padStart(3, "0")}`),
     name: String(row.name || ""),
     nameAr: String(row.nameAr || ""),
-    type: String(row.type || "Quality"),
-    polarity: String(row.polarity || "Higher is Better"),
+    type: coerceKpiType(row.type),
+    polarity: coercePolarity(row.polarity),
     formula: String(row.formula || ""),
     unit: String(row.unit || ""),
     target: toNumber(row.target),
@@ -139,7 +159,7 @@ async function fetchGoogleSheetsData(sheetId: string): Promise<DashboardData> {
     employeeCount: toNumber(row.employeeCount),
     overallScore: toNumber(row.overallScore),
     target: toNumber(row.target),
-    status: String(row.status || "Average"),
+    status: coercePerfStatus(row.status),
     kpis: toStringList(row.kpiIds).map((id) => kpiMap.get(id)).filter((item): item is KPI => Boolean(item)),
     monthlyTrend: toNumberList(row.monthlyTrend),
   }));
@@ -154,7 +174,7 @@ async function fetchGoogleSheetsData(sheetId: string): Promise<DashboardData> {
     baseSalary: toNumber(row.baseSalary),
     overallScore: toNumber(row.overallScore),
     target: toNumber(row.target),
-    status: String(row.status || "Average"),
+    status: coercePerfStatus(row.status),
     kpis: toStringList(row.kpiIds).map((id) => kpiMap.get(id)).filter((item): item is KPI => Boolean(item)),
     attendance: toNumber(row.attendance),
     monthlyTrend: toNumberList(row.monthlyTrend),
